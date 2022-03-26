@@ -9,6 +9,12 @@ import {
   faArrowRotateRight,
   faPersonArrowDownToLine,
 } from "@fortawesome/free-solid-svg-icons";
+import {
+  addToDb,
+  getStoredCart,
+  deleteCart,
+  removeSingleCart,
+} from "../../Utilities/fakeDb";
 
 const Shop = () => {
   const [products, setProducts] = useState([]);
@@ -19,6 +25,21 @@ const Shop = () => {
       .then((data) => setProducts(data));
   }, []);
 
+  // this is for localStorage
+  useEffect(() => {
+    const storedCart = getStoredCart();
+    const saveProduct = [];
+    for (const id in storedCart) {
+      const addedProduct = products.find((product) => product.id === id);
+      console.log(addedProduct);
+      if (addedProduct) {
+        const quantity = storedCart[id];
+        addedProduct.quantity = quantity;
+        saveProduct.push(addedProduct);
+      }
+    }
+    setCart(saveProduct);
+  }, [products]);
   // this is for adding cart in cart section
   const handleAddToCart = (product) => {
     const newCart = [...cart, product];
@@ -30,6 +51,7 @@ const Shop = () => {
       alert("Already added");
     } else {
       setCart(newCart);
+      addToDb(product.id);
     }
   };
 
@@ -42,7 +64,8 @@ const Shop = () => {
     setCart(newItem);
   };
   // this is for choose again btn
-  const handleChooseAgain = () => {
+  const handleChooseAgain = (id) => {
+    deleteCart(id);
     setCart([]);
   };
 
@@ -50,6 +73,7 @@ const Shop = () => {
   const handleDeleteBtn = (id) => {
     const newCart = [...cart];
     const rest = newCart.filter((item) => item.id !== id);
+    removeSingleCart(id);
     setCart(rest);
   };
 
